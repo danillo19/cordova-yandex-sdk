@@ -61,6 +61,7 @@
 
       <framework src="com.yandex.android:mobileads:6.3.0" />
       
+      <framework src="src/android/plugin.gradle" custom="true" type="gradleReference"/>
 
   </platform>
   
