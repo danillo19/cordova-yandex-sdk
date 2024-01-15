@@ -1,9 +1,6 @@
 package ca.cozycode.cordova.ads;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,11 +12,8 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaWebView;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.util.Log;
-import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.app.Activity;
-import android.net.Uri;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -31,8 +25,16 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.view.Gravity;
-import android.graphics.Rect;
 
+import com.yandex.mobile.ads.appopenad.AppOpenAd;
+import com.yandex.mobile.ads.appopenad.AppOpenAdEventListener;
+import com.yandex.mobile.ads.appopenad.AppOpenAdLoadListener;
+import com.yandex.mobile.ads.appopenad.AppOpenAdLoader;
+import com.yandex.mobile.ads.banner.BannerAdEventListener;
+import com.yandex.mobile.ads.banner.BannerAdSize;
+import com.yandex.mobile.ads.banner.BannerAdView;
+import com.yandex.mobile.ads.common.AdError;
+import com.yandex.mobile.ads.common.AdRequest;
 import com.yandex.mobile.ads.common.AdRequestConfiguration;
 import com.yandex.mobile.ads.common.AdRequestError;
 import com.yandex.mobile.ads.common.ImpressionData;
@@ -40,8 +42,11 @@ import com.yandex.mobile.ads.interstitial.InterstitialAd;
 import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener;
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener;
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader;
-
-import ca.cozycode.cordova.ads.NextAsync;
+import com.yandex.mobile.ads.rewarded.Reward;
+import com.yandex.mobile.ads.rewarded.RewardedAd;
+import com.yandex.mobile.ads.rewarded.RewardedAdEventListener;
+import com.yandex.mobile.ads.rewarded.RewardedAdLoadListener;
+import com.yandex.mobile.ads.rewarded.RewardedAdLoader;
 
 public class AdMobPlugin extends CordovaPlugin {
 
@@ -59,9 +64,9 @@ public class AdMobPlugin extends CordovaPlugin {
     public final String PLUGIN_API_CALLS_CREATE_REWARDED = "rewarded";
     public final String PLUGIN_API_CALLS_READY_REWARDED = "isReadyRewarded";
     public final String PLUGIN_API_CALLS_SHOW_REWARDED = "showRewarded";
-    public final String PLUGIN_API_CALLS_CREATE_REWARDEDINTERSTITIAL = "rewardedInterstitial";
-    public final String PLUGIN_API_CALLS_READY_REWARDEDINTERSTITIAL = "isReadyRewardedInterstitial";
-    public final String PLUGIN_API_CALLS_SHOW_REWARDEDINTERSTITIAL = "showRewardedInterstitial";
+    public final String PLUGIN_API_CALLS_CREATE_APP_OPEN_AD = "loadAppOpenAd";
+    public final String PLUGIN_API_CALLS_SHOW_APP_OPEN_AD = "showAppOpenAd";
+    public final String PLUGIN_API_CALLS_READY_APP_OPEN_AD = "isReadyAppOpenAd";
     protected HashMap<String, String> PLUGIN_API_CALLS = new HashMap<String, String>();
     public final String PLUGIN_ERROR_CODES_INVALID_ARGUMENTS = "INVALID_ARGUMENTS";
     public final String PLUGIN_ERROR_CODES_DEVELOPER_ERROR = "PLUGIN_DEVELOPER_ERROR";
@@ -78,29 +83,26 @@ public class AdMobPlugin extends CordovaPlugin {
     protected boolean mAdsInitialized = false;
 
     //ads
-    //AdView mBannerAdView;
+    BannerAdView mBannerAdView;
     InterstitialAd mInterstitialAd;
     InterstitialAdLoader mInterstitialAdLoader;
-    //RewardedAd mRewardedAd;
-    //RewardedInterstitialAd mRewardedInterstitialAd;
+    RewardedAd mRewardedAd;
+    RewardedAdLoader mRewardedAdLoader;
+    AppOpenAdLoader mAppOpenAdLoader;
+    AppOpenAd mAppOpenAd;
+
 
     RelativeLayout mBannerLayout;
     FrameLayout mBannerContainerLayout;
-    RelativeLayout mInterstitialLayout;
-    FrameLayout mInterstitialContainerLayout;
-
     NextAsync mBannerNext;
     NextAsync mIntersitialNext;
     NextAsync mRewarededNext;
-    NextAsync mRewardedInterstitialNext;
+    NextAsync mAppOpenNext;
 
     Boolean mRewardedAdRewarded = false;
     boolean mBannerTopActive = false;
     int mRewardedAdRewardedAmount = 0;
     String mRewardedAdRewardedType = "";
-    Boolean mRewardedInterstitialAdRewarded = false;
-    int mRewardedInterstitialAdRewardedAmount = 0;
-    String mRewardedInterstitialAdRewardedType = "";
 
     /**
      * Cordova plugin
@@ -116,9 +118,9 @@ public class AdMobPlugin extends CordovaPlugin {
         PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_CREATE_REWARDED, "prepare an rewarded ad");
         PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_READY_REWARDED, "check if rewarded ad is ready");
         PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_SHOW_REWARDED, "show a previously prepared rewarded ad");
-        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_CREATE_REWARDEDINTERSTITIAL, "prepare an interstitial rewarded ad");
-        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_READY_REWARDEDINTERSTITIAL, "check if interstitial rewarded ad is ready");
-        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_SHOW_REWARDEDINTERSTITIAL, "show a previously prepared interstitial rewarded ad");
+        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_CREATE_APP_OPEN_AD, "prepare an app open ad");
+        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_READY_APP_OPEN_AD, "check if app open ad is ready");
+        PLUGIN_API_CALLS.put(PLUGIN_API_CALLS_SHOW_APP_OPEN_AD, "show a previously prepared app open ad");
         PLUGIN_ERROR_CODES.put(PLUGIN_ERROR_CODES_INVALID_ARGUMENTS, "invalid arguments sent to the plugin, view the documentation");
         PLUGIN_ERROR_CODES.put(PLUGIN_ERROR_CODES_DEVELOPER_ERROR, "something went wrong with the plugin, contact github issues");
         PLUGIN_ERROR_CODES.put(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, "an unexpected error occurred");
@@ -145,32 +147,28 @@ public class AdMobPlugin extends CordovaPlugin {
                 callbackContext.error(makeError(PLUGIN_ERROR_CODES_DEVELOPER_ERROR, "Invalid API Request: " + action));
                 return false;
             }
+
             if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_BANNER))) {
-                // return banner(next);
-            }
-//            else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_REMOVE_BANNER))) {
-//                return removeBanner(next);
-//            }
-            else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_INTERSTITIAL))) {
+                return banner(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_REMOVE_BANNER))) {
+                return removeBanner(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_INTERSTITIAL))) {
                 return interstitial(next);
             } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_READY_INTERSTITIAL))) {
                 return isReadyInterstitial(next);
             } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_SHOW_INTERSTITIAL))) {
                 return showInterstitial(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_REWARDED))) {
+                return rewarded(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_READY_REWARDED))) {
+                return isReadyRewarded(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_SHOW_REWARDED))) {
+                return showRewarded(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_APP_OPEN_AD))) {
+                return appOpenAd(next);
+            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_SHOW_APP_OPEN_AD))) {
+                return showAppOpenAd(next);
             }
-//            else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_REWARDED))) {
-//                return rewarded(next);
-//            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_READY_REWARDED))) {
-//                return isReadyRewarded(next);
-//            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_SHOW_REWARDED))) {
-//                return showRewarded(next);
-//            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_CREATE_REWARDEDINTERSTITIAL))) {
-//                return rewardedInterstitial(next);
-//            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_READY_REWARDEDINTERSTITIAL))) {
-//                return isReadyRewardedInterstitial(next);
-//            } else if (PLUGIN_API_CALLS.get(action).equals(PLUGIN_API_CALLS.get(PLUGIN_API_CALLS_SHOW_REWARDEDINTERSTITIAL))) {
-//                return showRewardedInterstitial(next);
-//            }
 
             return false;
         } catch (Exception ex) {
@@ -194,47 +192,172 @@ public class AdMobPlugin extends CordovaPlugin {
         return mActivity.getWindow().getDecorView().findViewById(android.R.id.content);
     }
 
+    @SuppressLint("ResourceAsColor")
+    private boolean banner(NextAsync next){
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                mBannerNext = next;
+                String admob_id = next.getArgsAdMobId(true);
 
-    private boolean interstitial(NextAsync next) {
+                boolean newBanner = false;
+                if (mBannerAdView == null){
+                    newBanner = true;
+
+                    mBannerAdView = new BannerAdView(mActivity);
+                    mBannerAdView.setBannerAdEventListener(new BannerAdEventListener() {
+                        @Override
+                        public void onAdLoaded() {
+                            logInfo("banner ad loaded");
+                            if (mBannerNext != null){
+                                mBannerNext.callbackContext.success();
+                                mBannerNext = null;
+                            }
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(@NonNull AdRequestError adRequestError) {
+                            logInfo("banner ad did not load "+adRequestError.toString());
+                            if (mBannerNext != null){
+                                mBannerNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adRequestError.getCode(), adRequestError.getDescription(), mBannerNext.getArgsAdMobId()); //adError.toString()));
+                                mBannerNext = null;
+                            }
+                        }
+
+                        @Override
+                        public void onAdClicked() {
+
+                        }
+
+                        @Override
+                        public void onLeftApplication() {
+
+                        }
+
+                        @Override
+                        public void onReturnedToApplication() {
+
+                        }
+
+                        @Override
+                        public void onImpression(@Nullable ImpressionData impressionData) {
+
+                        }
+                    });
+                    //settings
+                    mBannerAdView.setAdUnitId(admob_id);
+                    mBannerAdView.setAdSize(getAdSize());
+                }
+
+                final AdRequest adRequest = new AdRequest.Builder()
+                        // Methods in the AdRequest.Builder class can be used here to specify individual options settings.
+                        .build();
+                mBannerAdView.loadAd(adRequest);
+                if (newBanner){
+                    //show banner
+                    View mainView = getView();
+                    ViewGroup parentView = (ViewGroup) mainView.getParent();
+                    if (next.getArgsAdPositionIsTop()){
+                        mBannerTopActive = true;
+                        parentView.addView(mBannerAdView, 0); //top
+                    } else {
+                        ViewGroup rootView = (ViewGroup) mainView.getRootView();
+                        RelativeLayout mBannerLayout = new RelativeLayout(mActivity);
+                        rootView.addView(mBannerLayout, new LayoutParams(-1, -1));
+                        mBannerLayout.bringToFront();
+                        //bottom center
+                        FrameLayout frameLayoutOuter = new FrameLayout(mActivity);
+                        mBannerLayout.addView(frameLayoutOuter,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT, Gravity.BOTTOM));
+                        mBannerContainerLayout = new FrameLayout(mActivity);
+                        frameLayoutOuter.addView(mBannerContainerLayout,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+                        mBannerContainerLayout.addView(mBannerAdView, 0);
+                        mBannerLayout.setBackgroundColor(android.R.color.black);
+                    }
+                    mainView.requestFocus();
+                } else {
+                    logInfo("ad requested on existing banner and settings");
+                }
+            } catch (Exception ex){
+                next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+            }
+            //next.callbackContext.success(); // Thread-safe.
+        });
+        return true;
+    }
+
+    private boolean removeBanner(NextAsync next){
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
-                    mIntersitialNext = next;
-
-                    mInterstitialAdLoader = new InterstitialAdLoader(mContext);
-                    mInterstitialAdLoader.setAdLoadListener(new InterstitialAdLoadListener() {
-
-                        @Override
-                        public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                            mInterstitialAd = interstitialAd;
-                            if (mIntersitialNext != null) {
-                                mIntersitialNext.callbackContext.success();
-                            }
-                            logInfo("ad was loaded");
-                        }
-
-                        @Override
-                        public void onAdFailedToLoad(@NonNull final AdRequestError adRequestError) {
-                            logError("ad wasn't loaded");
-                            if (mIntersitialNext != null) {
-                                mIntersitialNext.callbackContext.error(adRequestError.toString());
-                            }
-                        }
-                    });
-
-                    if (mInterstitialAdLoader != null) {
-                        final AdRequestConfiguration adRequestConfiguration =
-                                new AdRequestConfiguration.Builder("demo-interstitial-yandex").build();
-                        mInterstitialAdLoader.loadAd(adRequestConfiguration);
+                    if (mBannerContainerLayout != null && mBannerAdView != null){
+                        mBannerContainerLayout.removeView(mBannerAdView);
                     }
-
-                    logInfo("interstitial ad loaded");
-
-                } catch (Exception ex) {
+                    if (mBannerLayout != null) {
+                        View mainView = getView();
+                        ViewGroup rootView = (ViewGroup) mainView.getRootView();
+                        rootView.removeView(mBannerLayout);
+                        mainView.requestFocus();
+                        mBannerLayout = null;
+                    }
+                    if (mBannerTopActive){
+                        View mainView = getView();
+                        ViewGroup parentView = (ViewGroup) mainView.getParent();
+                        parentView.removeView(mBannerAdView);
+                    }
+                    if (mBannerAdView != null){
+                        mBannerAdView.destroy();
+                        logInfo("removed banner ads");
+                    }
+                    mBannerTopActive = false;
+                    mBannerAdView = null;
+                    next.callbackContext.success(); // Thread-safe.
+                } catch (Exception ex){
                     next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
                 }
-                //next.callbackContext.success(); // Thread-safe.
             }
+        });
+        return true;
+    }
+
+
+    private boolean interstitial(NextAsync next) {
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                String admob_id = next.getArgsAdMobId(true);
+                mIntersitialNext = next;
+
+                mInterstitialAdLoader = new InterstitialAdLoader(mContext);
+                mInterstitialAdLoader.setAdLoadListener(new InterstitialAdLoadListener() {
+
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                        if (mIntersitialNext != null) {
+                            mIntersitialNext.callbackContext.success();
+                        }
+                        logInfo("ad was loaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull final AdRequestError adRequestError) {
+                        logError("ad wasn't loaded");
+                        if (mIntersitialNext != null) {
+                            mIntersitialNext.callbackContext.error(adRequestError.toString());
+                        }
+                    }
+                });
+
+                if (mInterstitialAdLoader != null) {
+                    final AdRequestConfiguration adRequestConfiguration =
+                            new AdRequestConfiguration.Builder(admob_id).build();
+                    mInterstitialAdLoader.loadAd(adRequestConfiguration);
+                }
+
+                logInfo("interstitial ad loaded");
+
+            } catch (Exception ex) {
+                next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+            }
+            //next.callbackContext.success(); // Thread-safe.
         });
         return true;
     }
@@ -245,81 +368,80 @@ public class AdMobPlugin extends CordovaPlugin {
     }
 
     private boolean showInterstitial(NextAsync next) {
-        cordova.getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                try {
-                    if (mInterstitialAd != null) {
-                        mInterstitialAd.setAdEventListener(new InterstitialAdEventListener() {
-                            @Override
-                            public void onAdShown() {
-                                logInfo("Interstitial ad has shown, hehe");
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                if (mInterstitialAd != null) {
+                    mInterstitialAd.setAdEventListener(new InterstitialAdEventListener() {
+                        @Override
+                        public void onAdShown() {
+                            logInfo("Interstitial ad has shown, hehe");
+                        }
+
+                        @Override
+                        public void onAdFailedToShow(@NonNull AdError adError) {
+                            logError(adError.toString());
+                            if (mIntersitialNext != null) {
+                                mIntersitialNext.callbackContext.error(adError.toString());
+                            }
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            // Called when ad is dismissed.
+                            // Clean resources after Ad dismissed
+
+
+                            logInfo("Interstitial ad has been dismissed");
+
+
+                            if (mIntersitialNext != null){
+                                logInfo(mIntersitialNext.toString());
+                                mIntersitialNext.callbackContext.success();
+                                mIntersitialNext = null;
                             }
 
-                            @Override
-                            public void onAdFailedToShow(@NonNull com.yandex.mobile.ads.common.AdError adError) {
-                                logError(adError.toString());
-                                if (mIntersitialNext != null) {
-                                    mIntersitialNext.callbackContext.error(adError.toString());
-                                }
-                            }
+                            logInfo("Interstitial ad has been dismissed and callback success");
 
-                            @Override
-                            public void onAdDismissed() {
-                                // Called when ad is dismissed.
-                                // Clean resources after Ad dismissed
-
-
-                                logInfo("Interstitial ad has been dismissed");
-
-
-                                if (mIntersitialNext != null){
-                                    logInfo(mIntersitialNext.toString());
-                                    mIntersitialNext.callbackContext.success();
-                                    mIntersitialNext = null;
-                                }
-
-                                logInfo("Interstitial ad has been dismissed and callback success");
-
-                                if (mInterstitialAd != null) {
-                                    mInterstitialAd.setAdEventListener(null);
-
-                                }
-
-                                // Now you can preload the next interstitial ad.
-                                if (mInterstitialAdLoader != null) {
-                                    final AdRequestConfiguration adRequestConfiguration =
-                                            new AdRequestConfiguration.Builder("demo-interstitial-yandex").build();
-                                    mInterstitialAdLoader.loadAd(adRequestConfiguration);
-                                }
-
-                                mInterstitialAd = null; //do not show again
-                                View mainView = getView();
-                                if (mainView != null) {
-                                    mainView.requestFocus();
-                                }
-                            }
-
-                            @Override
-                            public void onAdClicked() {
-                                // Called when a click is recorded for an ad.
-                            }
-
-                            @Override
-                            public void onAdImpression(@Nullable ImpressionData impressionData) {
+                            if (mInterstitialAd != null) {
+                                mInterstitialAd.setAdEventListener(null);
 
                             }
-                        });
 
-                        if (mIntersitialNext != null) next.setArgs(mIntersitialNext);
-                        mIntersitialNext = next;
+                            // Now you can preload the next interstitial ad.
+                            //TODO: change demo id on real one
+                            if (mInterstitialAdLoader != null) {
+                                final AdRequestConfiguration adRequestConfiguration =
+                                        new AdRequestConfiguration.Builder("demo-interstitial-yandex").build();
+                                mInterstitialAdLoader.loadAd(adRequestConfiguration);
+                            }
 
-                        mInterstitialAd.show(mActivity);
-                    } else {
-                        next.OnError(PLUGIN_ERROR_CODES_SHOW_AD_ERROR, mIntersitialNext.getArgsAdMobId());
-                    }
-                } catch (Exception ex) {
-                    next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+                            mInterstitialAd = null; //do not show again
+                            View mainView = getView();
+                            if (mainView != null) {
+                                mainView.requestFocus();
+                            }
+                        }
+
+                        @Override
+                        public void onAdClicked() {
+                            // Called when a click is recorded for an ad.
+                        }
+
+                        @Override
+                        public void onAdImpression(@Nullable ImpressionData impressionData) {
+
+                        }
+                    });
+
+                    if (mIntersitialNext != null) next.setArgs(mIntersitialNext);
+                    mIntersitialNext = next;
+
+                    mInterstitialAd.show(mActivity);
+                } else {
+                    next.OnError(PLUGIN_ERROR_CODES_SHOW_AD_ERROR, mIntersitialNext.getArgsAdMobId());
                 }
+            } catch (Exception ex) {
+                next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
             }
         });
         return true;
@@ -335,6 +457,244 @@ public class AdMobPlugin extends CordovaPlugin {
             logError("ERROR: error creating response object " + e.toString());
         }
         return ret;
+    }
+
+    private boolean rewarded(NextAsync next){
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    String admob_id = next.getArgsAdMobId(true);
+                    mRewarededNext = next;
+                    mRewardedAdRewarded = false;
+                    mRewardedAdRewardedAmount = 0;
+                    mRewardedAdRewardedType = "";
+
+                    mRewardedAdLoader = new RewardedAdLoader(mContext);
+                    mRewardedAdLoader.setAdLoadListener(new RewardedAdLoadListener() {
+                        @Override
+                        public void onAdLoaded(@NonNull final RewardedAd rewardedAd) {
+                            mRewardedAd = rewardedAd;
+                            if (mRewarededNext != null){
+                                mRewarededNext.callbackContext.success();
+                            }
+                            // The ad was loaded successfully. Now you can show loaded ad.
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(@NonNull final AdRequestError adRequestError) {
+                            logInfo("rewarded ad failed to load "+ adRequestError);
+                            if (mRewarededNext != null){
+                                mRewarededNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adRequestError.getCode(), adRequestError.toString(), mRewarededNext.getArgsAdMobId()); //adError.toString()));
+                                mRewarededNext = null;
+                            }
+
+                        }
+                    });
+
+                    if (mRewardedAdLoader != null ) {
+                        final AdRequestConfiguration adRequestConfiguration =
+                                new AdRequestConfiguration.Builder(admob_id).build();
+                        mRewardedAdLoader.loadAd(adRequestConfiguration);
+                    }
+
+
+                } catch (Exception ex){
+                    next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+                }
+            }
+        });
+        return true;
+    }
+    private boolean isReadyRewarded(NextAsync next){
+        next.callbackContext.success(mRewardedAd != null ? 1 : 0);
+        return true;
+    }
+    private boolean showRewarded(NextAsync next){
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    if (mRewardedAd != null){
+                        mRewardedAd.setAdEventListener(new RewardedAdEventListener() {
+                            @Override
+                            public void onAdShown() {
+
+                            }
+
+                            @Override
+                            public void onAdFailedToShow(@NonNull AdError adError) {
+                                logInfo("rewarded ad failed to load "+adError.toString());
+                                if (mRewarededNext != null){
+                                    mRewarededNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adError.getDescription() + "\nAdmobID: " + mRewarededNext.getArgsAdMobId()); //adError.toString()));
+                                    mRewarededNext = null;
+                                }
+                            }
+
+                            @Override
+                            public void onAdDismissed() {
+                                logInfo("rewarded ad dismissed fullscreen content.");
+                                if (mRewarededNext != null){
+                                    mRewarededNext.callbackContext.success(rewardObject(mRewardedAdRewarded,mRewardedAdRewardedAmount,mRewardedAdRewardedType));
+                                    mRewarededNext = null;
+                                }
+                                mRewardedAd = null; //do not show again
+                                View mainView = getView();
+                                if (mainView != null) {
+                                    mainView.requestFocus();
+                                }
+                            }
+
+                            @Override
+                            public void onAdClicked() {
+
+                            }
+
+                            @Override
+                            public void onAdImpression(@Nullable ImpressionData impressionData) {
+
+                            }
+
+                            @Override
+                            public void onRewarded(@NonNull Reward reward) {
+                                logInfo("rewarded ad has been earned");
+                                mRewardedAdRewarded = true;
+                                mRewardedAdRewardedAmount = reward.getAmount();
+                                mRewardedAdRewardedType = reward.getType();
+                            }
+                        });
+
+                        if (mRewarededNext != null) next.setArgs(mRewarededNext);
+                        mRewarededNext = next;
+                        mRewardedAd.show(mActivity);
+                    } else {
+                        next.OnError(PLUGIN_ERROR_CODES_SHOW_AD_ERROR, mRewarededNext.getArgsAdMobId());
+                    }
+                } catch (Exception ex){
+                    next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+                }
+            }
+        });
+        return true;
+    }
+
+    private boolean appOpenAd(NextAsync next){
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    String admob_id = next.getArgsAdMobId(true);
+                    mAppOpenNext = next;
+                    
+                    mAppOpenAdLoader = new AppOpenAdLoader(mContext);
+                    mAppOpenAdLoader.setAdLoadListener(new AppOpenAdLoadListener() {
+                        @Override
+                        public void onAdLoaded(@NonNull final AppOpenAd appOpenAd) {
+                            mAppOpenAd = appOpenAd;
+                            if (mAppOpenNext != null){
+                                mAppOpenNext.callbackContext.success();
+                            }
+                            // The ad was loaded successfully. Now you can show loaded ad.
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(@NonNull final AdRequestError adRequestError) {
+                            logInfo("app open ad failed to load "+ adRequestError);
+                            if (mRewarededNext != null){
+                                mRewarededNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adRequestError.getCode(), adRequestError.toString(), mRewarededNext.getArgsAdMobId()); //adError.toString()));
+                                mRewarededNext = null;
+                            }
+
+                        }
+                    });
+
+                    if (mAppOpenAdLoader != null ) {
+                        AdRequestConfiguration adRequestConfiguration =
+                                new AdRequestConfiguration.Builder(admob_id).build();
+                        mAppOpenAdLoader.loadAd(adRequestConfiguration);
+                    }
+
+
+                } catch (Exception ex){
+                    next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+                }
+            }
+        });
+        return true;
+    }
+
+    private boolean showAppOpenAd(NextAsync next){
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                if (mAppOpenAd != null){
+                    mAppOpenAd.setAdEventListener(new AppOpenAdEventListener() {
+                        @Override
+                        public void onAdShown() {
+
+                        }
+
+                        @Override
+                        public void onAdFailedToShow(@NonNull AdError adError) {
+                            logInfo("rewarded ad failed to load "+adError.toString());
+                            if (mAppOpenNext != null){
+                                mAppOpenNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adError.getDescription()); //adError.toString()));
+                                mAppOpenNext = null;
+                            }
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            logInfo("app open ad dismissed fullscreen content.");
+                            if (mAppOpenNext != null){
+                                mAppOpenNext.callbackContext.success();
+                                mAppOpenNext = null;
+                            }
+
+                            if (mAppOpenAd != null) {
+                                mAppOpenAd.setAdEventListener(null);
+                            }
+                            mAppOpenAd = null; //do not show again
+
+                            View mainView = getView();
+                            if (mainView != null) {
+                                mainView.requestFocus();
+                            }
+                            
+                            //TODO: add ad preloading
+                        }
+
+                        @Override
+                        public void onAdClicked() {
+
+                        }
+
+                        @Override
+                        public void onAdImpression(@Nullable ImpressionData impressionData) {
+
+                        }
+                    });
+
+                    if (mAppOpenAd != null) next.setArgs(mAppOpenNext);
+                    mAppOpenNext = next;
+                    mAppOpenAd.show(mActivity);
+                } else {
+                    next.OnError(PLUGIN_ERROR_CODES_SHOW_AD_ERROR, mRewarededNext.getArgsAdMobId());
+                }
+            } catch (Exception ex){
+                next.callbackContext.error(makeError(PLUGIN_ERROR_CODES_UNKNOWN_ERROR, ex.toString()));
+            }
+        });
+        return true;
+    }
+
+    private BannerAdSize getAdSize() {
+        final DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
+        // Calculate the width of the ad, taking into account the padding in the ad container.
+        int adWidthPixels = getView().getWidth();
+        if (adWidthPixels == 0) {
+            // If the ad hasn't been laid out, default to the full screen width
+            adWidthPixels = displayMetrics.widthPixels;
+        }
+        final int adWidth = Math.round(adWidthPixels / displayMetrics.density);
+
+        return BannerAdSize.stickySize(mContext, adWidth);
     }
 
     /* Errors */
