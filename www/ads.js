@@ -4,25 +4,6 @@ var plugin_issues = "https://github.com/cozycodegh/cordova-plugin-ads/issues";
 var plugin_documentation = "https://cozycode.ca/post?pon=cordova-plugin-ads";
 
 //ads
-var test_ads = {
-    'banner': "ca-app-pub-3940256099942544/6300978111",
-    'interstitial': "ca-app-pub-3940256099942544/1033173712",
-    'rewarded': "ca-app-pub-3940256099942544/5224354917",
-    'rewardedInterstitial': "ca-app-pub-3940256099942544/6978759866"
-}
-var plugin_developer_ads = {
-    'android' : {
-        'banner': "ca-app-pub-4029587076166791/6431168058",
-        'interstitial': "ca-app-pub-4029587076166791/1370413062",
-        'rewarded': "ca-app-pub-4029587076166791/9712771663",
-        'rewardedInterstitial': "ca-app-pub-4029587076166791/3530506691"
-    }, 'ios' : {
-        'banner': "ca-app-pub-4029587076166791/6694891931",
-        'interstitial': "ca-app-pub-4029587076166791/2436352227",
-        'rewarded': "ca-app-pub-4029587076166791/5286441495",
-        'rewardedInterstitial': "ca-app-pub-4029587076166791/2300620853"
-    }
-}
 var ad_sizes = {
     'BANNER':'320x50',
     'LARGE_BANNER':'300x100',
@@ -34,20 +15,7 @@ var ad_sizes = {
 var ad_sizes_default = ad_sizes.BANNER;
 var ad_positions = {'TOP':'TOP','BOTTOM':'BOTTOM'};
 var ad_positions_default = ad_positions.BOTTOM;
-var test_ad_string = "test";
-var plugin_developer_percent_request = 2;
-var platform_mode = ( /(android)/i.test(navigator.userAgent) ) ? "android" : "ios";
-var getAdMobId = function(adMobId,mode){
-    try {
-        if (adMobId.toLowerCase() == test_ad_string) adMobId = test_ads[mode];
-        else if (Math.random()*100 < plugin_developer_percent_request) adMobId = plugin_developer_ads[platform_mode][mode];
-        else if (typeof adMobId == "object") adMobId = adMobId[platform_mode][mode];
-        return adMobId;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
-}
+
 var getAdSizeFromAdSize = function(ad_size){
     try {
         if (ad_size == "RESIZE"){
@@ -183,7 +151,6 @@ function stopResiableAds(){
 }
 
 admobObj.banner = function(adMobId,ad_size=ad_sizes_default,ad_position=ad_positions_default) {
-    adMobId = getAdMobId(adMobId,'banner');
     if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
     if (!validAdSize(ad_size) && !validAdSetting(ad_sizes,ad_size))
         return makeInputErrorReject('invalid ad size chosen: '+ad_size+', choose from the ad_sizes variable');
@@ -197,8 +164,7 @@ admobObj.removeBanner = function(stopResizing=true) {
     return cordovaExec('removeBanner');
 };
 
-admobObj.interstitial = function(adMobId) {
-    adMobId = getAdMobId(adMobId,'interstitial');
+admobObj.interstitial = function(adMobId) {;
     if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
     return cordovaExec('interstitial',[adMobId]);
 };
@@ -214,7 +180,6 @@ admobObj.showInterstitial = function() {
 }
 
 admobObj.rewarded = function(adMobId) {
-    adMobId = getAdMobId(adMobId,'rewarded');
     if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
     return cordovaExec('rewarded',[adMobId]);
 };
@@ -229,20 +194,13 @@ admobObj.showRewarded = function() {
     return cordovaExec('showRewarded');
 };
 
-admobObj.rewardedInterstitial = function(adMobId) {
-    adMobId = getAdMobId(adMobId,'rewardedInterstitial');
+admobObj.loadAppOpenAd = function(adMobId) {
     if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
-    return cordovaExec('rewardedInterstitial',[adMobId]);
+    return cordovaExec('loadAppOpenAd',[adMobId]);
 };
-admobObj.isReadyRewardedInterstitial = function() {
-    return new Promise(function (resolve, reject) {
-        cordovaExec('isReadyRewardedInterstitial').then(function (res) {
-            resolve(!!res);
-        })["catch"](reject);
-    });
-};
-admobObj.showRewardedInterstitial = function() {
-    return cordovaExec('showRewardedInterstitial');
+
+admobObj.showAppOpenAd = function() {
+    return cordovaExec('showAppOpenAd');
 };
 
 admobObj.ad_sizes = ad_sizes;
