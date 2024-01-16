@@ -1,25 +1,23 @@
 {
-  "name": "cordova-plugin-ads-donottrack",
-  "version": "2.0.3",
+  "name": "cordova-plugin-yandex-ads",
+  "version": "2.0.0",
   "author": {
-    "name": "CozyCode",
-    "email": "hello@cozycode.ca"
+    "name": "GamePush",
+    "email": "gamescoredev@gmail.com"
   },
-  "description": "Cordova plugin to add ads into an app (when no tracking is collected). Use javascript to request ads by AdMob.",
-  "main": "ios/ios-index.js",
+  "description": "Cordova plugin to add ads into an app via Yandex mobile SDK.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cozycodegh/cordova-plugin-ads-donottrack.git"
+    "url": "git+https://github.com/danillo19/cordova-yandex-sdk.git"
   },
   "keywords": [
     "cordova",
     "plugin",
     "ads",
     "app",
-    "ios",
     "android",
     "ecosystem:cordova",
     "cordova-android",
@@ -30,6 +28,7 @@
     "ios",
     "itunes",
     "google",
+    "yandex",
     "play",
     "ionic",
     "phonegap",
@@ -37,9 +36,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cozycodegh/cordova-plugin-ads-donottrack/issues"
+    "url": "https://github.com/danillo19/cordova-yandex-sdk/issues"
   },
-  "homepage": "https://github.com/cozycodegh/cordova-plugin-ads-donottrack#readme",
+  "homepage": "https://github.com/danillo19/cordova-yandex-sdk#readme",
   "devDependencies": {
     "@babel/core": "^7.15.8",
     "@babel/plugin-transform-async-to-generator": "^7.14.5",

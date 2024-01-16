@@ -2,25 +2,24 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="cordova-plugin-ads-donottrack"
+  id="cordova-plugin-yandex-ads"
   version="2.0.0">
 
-  <name>Ads with Admob (when no tracking is enabled)</name>
-  <description>Cordova plugin to add advertisements (via Google AdMob).</description>
+  <name>Yandex Ads SDK</name>
+  <description>Cordova plugin to add advertisements (via Yandex Mobile SDK).</description>
   <engines>
     <engine name="cordova" version=">=5.0.0" />
     <engine name="cordova-android" version=">=7.0.0" />
   </engines>
-  <repo>https://github.com/cozycodegh/cordova-plugin-ads-donottrack.git</repo>
-  <issue>https://github.com/cozycodegh/cordova-plugin-ads-donottrack/issues</issue>
+  <repo>https://github.com/danillo19/cordova-yandex-sdk.git</repo>
+  <issue>https://github.com/danillo19/cordova-yandex-sdk/issues</issue>
 
   <license>MIT</license>
-  <keywords>cordova,plugin,ads,admob,google,advertisements,app,ios,android,ecosystem:cordova,monetization,cordova-android,cordova-ios,promise,promises,android,ios,ionic,phonegap</keywords>
+  <keywords>cordova,plugin,ads,admob,yandex,google,advertisements,app,android,ecosystem:cordova,monetization,cordova-android,cordova-ios,promise,promises,android,ios,ionic,phonegap</keywords>
   
   <engines>
       <engine name="cordova" version=">=7.0" />
       <engine name="cordova-android" version=">=6.0.0" />
-      <engine name="cordova-ios" version=">=5.0.0" />
   </engines>
   
   <js-module src="www/ads.js" name="AdMobPlugin">
@@ -30,12 +29,12 @@
   <platform name="android">
       <config-file target="res/xml/config.xml" parent="/*">
         <feature name="AdMobPlugin">
-          <param name="android-package" value="ca.cozycode.cordova.ads.AdMobPlugin"/>
+          <param name="android-package" value="gp.danillo.cordova.ads.AdMobPlugin"/>
         </feature>
       </config-file>
 
-      <source-file src="src/android/AdMobPlugin.java" target-dir="app/src/main/java/ca/cozycode/cordova/ads" />
-      <source-file src="src/android/NextAsync.java" target-dir="app/src/main/java/ca/cozycode/cordova/ads" />
+      <source-file src="src/android/AdMobPlugin.java" target-dir="app/src/main/java/gp/danillo/cordova/ads" />
+      <source-file src="src/android/NextAsync.java" target-dir="app/src/main/java/gp/danillo/cordova/ads" />
       
       <config-file target="AndroidManifest.xml" parent="/*">
           <uses-permission android:name="android.permission.INTERNET"/>

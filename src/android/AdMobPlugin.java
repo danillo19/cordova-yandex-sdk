@@ -1,4 +1,4 @@
-package ca.cozycode.cordova.ads;
+package gp.danillo.cordova.ads;
 
 import java.util.HashMap;
 

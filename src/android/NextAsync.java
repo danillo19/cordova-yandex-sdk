@@ -1,6 +1,4 @@
-// (c) 2023 cozycode.ca cordova-plugin-ads
-
-package ca.cozycode.cordova.ads;
+package gp.danillo.cordova.ads;
 
 import android.app.Activity;
 import android.content.Context;
