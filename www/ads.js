@@ -150,23 +150,23 @@ function stopResiableAds(){
     //window.removeEventListener('resize',resizeBannerAd);
 }
 
-admobObj.banner = function(adMobId,ad_size=ad_sizes_default,ad_position=ad_positions_default) {
-    if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
+admobObj.banner = function(adUnitId,ad_size=ad_sizes_default,ad_position=ad_positions_default) {
+    if (!validString(adUnitId)) return makeInputErrorReject('adUnitId was not specified');
     if (!validAdSize(ad_size) && !validAdSetting(ad_sizes,ad_size))
         return makeInputErrorReject('invalid ad size chosen: '+ad_size+', choose from the ad_sizes variable');
     if (!validAdSetting(ad_positions,ad_position)) return makeInputErrorReject('invalid ad position chosen: '+ad_position+', choose from the ad_positions variable');
-    startResizableAds(adMobId,ad_size,ad_position);
+    startResizableAds(adUnitId,ad_size,ad_position);
     ad_size = getAdSizeFromAdSize(ad_size);
-    return cordovaExec('banner',[adMobId,ad_size,ad_position]);
+    return cordovaExec('banner',[adUnitId,ad_size,ad_position]);
 };
 admobObj.removeBanner = function(stopResizing=true) {
     if (stopResizing) stopResiableAds();
     return cordovaExec('removeBanner');
 };
 
-admobObj.interstitial = function(adMobId) {;
-    if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
-    return cordovaExec('interstitial',[adMobId]);
+admobObj.interstitial = function(adUnitId) {;
+    if (!validString(adUnitId)) return makeInputErrorReject('adUnitId was not specified');
+    return cordovaExec('interstitial',[adUnitId]);
 };
 admobObj.isReadyInterstitial = function() {
     return new Promise(function (resolve, reject) {
@@ -179,9 +179,9 @@ admobObj.showInterstitial = function() {
     return cordovaExec('showInterstitial');
 }
 
-admobObj.rewarded = function(adMobId) {
-    if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
-    return cordovaExec('rewarded',[adMobId]);
+admobObj.rewarded = function(adUnitId) {
+    if (!validString(adUnitId)) return makeInputErrorReject('adUnitId was not specified');
+    return cordovaExec('rewarded',[adUnitId]);
 };
 admobObj.isReadyRewarded = function() {
     return new Promise(function (resolve, reject) {
@@ -194,9 +194,9 @@ admobObj.showRewarded = function() {
     return cordovaExec('showRewarded');
 };
 
-admobObj.loadAppOpenAd = function(adMobId) {
-    if (!validString(adMobId)) return makeInputErrorReject('adMob id was not specified');
-    return cordovaExec('loadAppOpenAd',[adMobId]);
+admobObj.loadAppOpenAd = function(adUnitId) {
+    if (!validString(adUnitId)) return makeInputErrorReject('adUnitId was not specified');
+    return cordovaExec('loadAppOpenAd',[adUnitId]);
 };
 
 admobObj.showAppOpenAd = function() {

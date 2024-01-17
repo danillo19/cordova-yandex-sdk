@@ -15,7 +15,7 @@
   <issue>https://github.com/danillo19/cordova-yandex-sdk/issues</issue>
 
   <license>MIT</license>
-  <keywords>cordova,plugin,ads,admob,yandex,google,advertisements,app,android,ecosystem:cordova,monetization,cordova-android,cordova-ios,promise,promises,android,ios,ionic,phonegap</keywords>
+  <keywords>cordova,plugin,ads,yandex,google,advertisements,app,android,ecosystem:cordova,monetization,cordova-android,cordova-ios,promise,promises,android,ios,ionic,phonegap</keywords>
   
   <engines>
       <engine name="cordova" version=">=7.0" />
@@ -23,7 +23,7 @@
   </engines>
   
   <js-module src="www/ads.js" name="AdMobPlugin">
-    <merges target="adMob" />
+    <merges target="yaAdMob" />
   </js-module>
 
   <platform name="android">

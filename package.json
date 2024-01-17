@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "author": {
     "name": "GamePush",
-    "email": "gamescoredev@gmail.com"
+    "email": "official@gamepush.com"
   },
   "description": "Cordova plugin to add ads into an app via Yandex mobile SDK.",
   "scripts": {

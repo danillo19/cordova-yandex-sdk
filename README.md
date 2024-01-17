@@ -16,24 +16,24 @@ document.addEventListener('deviceready', onDeviceReady, false);
 document.addEventListener("resume", onResume, false);
 
 async function runAllOfTheAds(){
-    await adMob.banner("demo-banner-yandex").then(function(){
+    await yaAdMob.banner("demo-banner-yandex").then(function(){
         alert("loaded banner ads");
     }).catch(function(err){
         alert("unable to load ads: "+JSON.stringify(err));
     });
     
-    await adMob.interstitial("demo-interstitial-yandex").then(function(){
+    await yaAdMob.interstitial("demo-interstitial-yandex").then(function(){
         alert("loaded interstitial ads");;
-        return adMob.showInterstitial();
+        return yaAdMob.showInterstitial();
     }).then(function(){
         alert("showed interstitial ads");
     }).catch(function(err){
         alert("unable to load ads: "+JSON.stringify(err));
     });
     
-    await adMob.rewarded("demo-rewarded-yandex").then(function(){
+    await yaAdMob.rewarded("demo-rewarded-yandex").then(function(){
         console.log("loaded rewarded ads");
-        return adMob.showRewarded();
+        return yaAdMob.showRewarded();
     }).then(function(reward){
         alert("showed rewarded ads"+JSON.stringify(reward));
     }).catch(function(err){
@@ -47,9 +47,9 @@ function onDeviceReady() {
 }
 
 async function showAppOpenAd() {
-    await adMob.loadAppOpenAd("demo-appopenad-yandex").then(()=> {
+    await yaAdMob.loadAppOpenAd("demo-appopenad-yandex").then(()=> {
         alert("loaded app open ad");
-        return adMob.showAppOpenAd();
+        return yaAdMob.showAppOpenAd();
     });
 }
 
