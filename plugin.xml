@@ -47,6 +47,10 @@
           android:name="com.google.android.gms.ads.AdActivity"
           android:excludeFromRecents="true"
           android:noHistory="true" />
+
+           <meta-data
+          android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT"
+          android:value="true"/>
       </config-file>
       
       <framework src="com.google.android.gms:play-services-ads:22.3.0" />
