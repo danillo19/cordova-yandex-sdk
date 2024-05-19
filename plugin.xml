@@ -55,36 +55,10 @@
       
       <framework src="com.google.android.gms:play-services-ads:22.3.0" />
 
-      <framework src="com.yandex.android:mobileads:6.3.0" />
-      
-      <framework src="src/android/plugin.gradle" custom="true" type="gradleReference"/>
+      <framework src="com.yandex.android:mobileads-mediation:7.0.1.0" />
+      <framework src="com.yandex.ads.mediation:mobileads-adcolony:4.8.0.11" />
 
-  </platform>
-  
-  <platform name="fire-os">
-      <config-file target="config.xml" parent="/*">
-          <feature name="AdMobPlugin">
-              <param name="ios-package" value="AdMobPlugin" />
-          </feature>
-      </config-file>
-  </platform>
-  
-  <!-- not supported below -->
-  <platform name="browser">
-      <config-file target="config.xml" parent="/*">
-          <feature name="AdMobPlugin">
-              <param name="ios-package" value="AdMobPlugin" />
-          </feature>
-      </config-file>
-  </platform>
-  
-  <!-- not supported below -->
-  <platform name="windows"> 
-      <config-file target="config.xml" parent="/*">
-          <feature name="AdMobPlugin">
-              <param name="ios-package" value="AdMobPlugin" />
-          </feature>
-      </config-file> 
+      <framework src="src/android/plugin.gradle" custom="true" type="gradleReference"/>
   </platform>
 
 </plugin>
