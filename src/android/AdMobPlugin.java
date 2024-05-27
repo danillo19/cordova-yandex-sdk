@@ -597,9 +597,9 @@ public class AdMobPlugin extends CordovaPlugin {
                         @Override
                         public void onAdFailedToLoad(@NonNull final AdRequestError adRequestError) {
                             logInfo("app open ad failed to load "+ adRequestError);
-                            if (mRewarededNext != null){
-                                mRewarededNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adRequestError.getCode(), adRequestError.toString(), mRewarededNext.getArgsAdMobId()); //adError.toString()));
-                                mRewarededNext = null;
+                            if (mAppOpenNext != null){
+                                mAppOpenNext.OnError(PLUGIN_ERROR_CODES_LOAD_AD_ERROR, adRequestError.getCode(), adRequestError.toString(), mRewarededNext.getArgsAdMobId()); //adError.toString()));
+                                mAppOpenNext = null;
                             }
 
                         }
