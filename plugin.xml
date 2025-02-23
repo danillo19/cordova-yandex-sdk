@@ -55,8 +55,12 @@
       
       <framework src="com.google.android.gms:play-services-ads:22.3.0" />
 
-      <framework src="com.yandex.android:mobileads-mediation:7.0.1.0" />
+      <framework src="com.yandex.android:mobileads-mediation:7.10.1.0" />
       <framework src="com.yandex.ads.mediation:mobileads-adcolony:4.8.0.11" />
+      <framework src="com.yandex.ads.mediation:mobileads-mytarget:5.22.1.6" />
+      <framework src="com.yandex.ads.mediation:mobileads-vungle:7.4.2.2" />
+      <framework src="com.yandex.ads.mediation:mobileads-mintegral:16.8.61.4" />
+      <framework src="com.yandex.ads.mediation:mobileads-bigoads:5.0.2.2" />
 
       <framework src="src/android/plugin.gradle" custom="true" type="gradleReference"/>
   </platform>
