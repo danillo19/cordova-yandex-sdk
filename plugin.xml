@@ -53,16 +53,16 @@
           android:value="true"/>
       </config-file>
       
-      <framework src="com.google.android.gms:play-services-ads:22.3.0" />
+      <framework src="com.google.android.gms:play-services-ads:22.5.0" />
 
-      <framework src="com.yandex.android:mobileads-mediation:7.16.1.0" />
+      <framework src="com.yandex.android:mobileads-mediation:7.17.0.0" />
       <framework src="com.yandex.ads.mediation:mobileads-adcolony:4.8.0.14" />
-      <framework src="com.yandex.ads.mediation:mobileads-mytarget:5.27.1.2" />
-      <framework src="com.yandex.ads.mediation:mobileads-vungle:7.4.2.6" />
-      <framework src="com.yandex.ads.mediation:mobileads-mintegral:16.9.41.2" />
-      <framework src="com.yandex.ads.mediation:mobileads-bigoads:5.3.0.2" />
-      <framework src="com.yandex.ads.mediation:mobileads-startapp:5.0.2.11" />
-      <framework src="com.yandex.ads.mediation:mobileads-google:23.6.0.8" />
+      <framework src="com.yandex.ads.mediation:mobileads-mytarget:5.27.3.1" />
+      <framework src="com.yandex.ads.mediation:mobileads-vungle:7.4.2.13" />
+      <framework src="com.yandex.ads.mediation:mobileads-mintegral:16.9.81.3" />
+      <framework src="com.yandex.ads.mediation:mobileads-bigoads:5.5.1.1" />
+      <framework src="com.yandex.ads.mediation:mobileads-startapp:5.0.2.18" />
+      <framework src="com.yandex.ads.mediation:mobileads-google:23.6.0.9" />
 
       <framework src="src/android/plugin.gradle" custom="true" type="gradleReference"/>
   </platform>
